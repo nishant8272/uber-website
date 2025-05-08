@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
-import { Link, useSearchParams } from'react-router-dom'
-
+import { Link,useNavigate } from'react-router-dom'
+import axios from 'axios'
+import { useContext } from 'react'
+import{UserDataContext }from '../context/Usercontext'
 const UserSignup = () => {
  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstname, setFirstname] = useState('')
   const [lastname, setLastname] = useState('')
  
-  const [userData, setUserData] = useState({})
-
+ const navigate=useNavigate()
+ const {user,setUser} = useContext(UserDataContext)
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
     const newUserData = {
@@ -19,12 +22,25 @@ const UserSignup = () => {
         lastname:lastname
       }
     }
-    setUserData(newUserData)
-    setEmail('')
-    setPassword('')
-    setFirstname('')
-    setLastname('')
-  }
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUserData)
+      if(response.status===201){
+       const data = response.data
+       alert('user registered successfully')
+       setUser(data.user)
+       localStorage.setItem('token', data.token)
+      }
+      setEmail('')
+      setPassword('')
+      setFirstname('')
+      setLastname('')
+      navigate('/home')
+   
+     } catch  (error) {
+      alert(error.response?.data?.message || 'Registration failed')
+    }
+     }
+    
   return (
     <div className='p-7 flex  h-screen flex-col justify-between'>
       <img className="w-16 mb-10" src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="" />
